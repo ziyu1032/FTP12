@@ -482,10 +482,10 @@
         <div class="transcript" id="transcript">
           <b>Alex:</b> Good morning, everybody! Alex here.<br>
           Shamei Village — a village that has become a new shiny <b>model of village development</b>.<br>
-          The first thing I want to say is its <b>unique location</b>. We call it <b>"Shan Shui Lin Tian Hu"</b> — <b>mountains, water, forest, fields and lake</b>. There's a mountain, <b>Jinniu Ling</b>, over there. This is pretty unique.<br>
-          Shamei Village stays right next to the <b>Boao Forum for Asia</b>, so during the season many <b>foreign guests</b> come here. They take a stroll along this beautiful <b>boardwalk</b>.<br>
-          This whole project of modification was started back in <b>2018</b>. Since then, so many things have changed — and it's just stunning. Every time I come here I find something new.<br>
-          A must-try: <b>Qingbuliang</b> (a sweet coconut dessert soup)! And this part is called <b>"Shamei Impression"</b> — with beautiful architecture, many <b>homestays and restaurants</b>. Basically it has everything you need when you're traveling on vacation.
+          The first thing I want to say is its <b>unique location</b>. In Chinese there is a saying, <b>"Shan Shui Lin Tian Hu"</b> — which means <b>it has everything</b>. There is a mountain, <b>Jinniu Ling</b>, over there, and everything is super green and lush. And another important thing: there is an <b>inner sea</b> — it's not a lake, it's not a river, it's an inner sea. Pretty unique!<br>
+          Shamei Village also plays an important role in the holding of the <b>annual forum</b>. During the conference, many <b>officials</b> come here, take a stroll along this beautiful <b>boardwalk</b>, and discuss very important topics.<br>
+          This whole project started back in <b>2017</b> — and it's been only about four years, but so many things have changed. It's just stunning. Every time I come here I find something new.<br>
+          When it's hot, it's time for a <b>Qingbuliang</b> (a sweet coconut dessert soup)! And this part is called <b>"Shamei Impression"</b> — a newly built town in ancient style, with beautiful architecture, many <b>bed-and-breakfast places</b>, restaurants, local snacks and attractions for kids. Basically it has everything you need when you're traveling on vacation.
         </div>
       </div>
     </div>
@@ -660,28 +660,28 @@
    不靠通读印象就能猜对，必须真的看过、听清。
    注意：选项顺序在运行时打乱（见 prepareQuiz），答案不固定在某一个位置。 */
 const CQUIZ = [
-  { q:"Alex names four things the village has become famous for. Which ONE is NOT on his list?",
+  { q:"Which ONE of these does Alex NOT mention in the video?",
     o:["A new model of village development","A unique location","Beautiful architecture","A white sandy beach"],
     a:3, tag:"overview" },
-  { q:"How many things does \"Shan Shui Lin Tian Hu\" include, and in what order does Alex say them?",
-    o:["Five — mountains, water, forest, fields, lake","Four — mountains, water, forest, lake","Six — mountains, rivers, forest, fields, fish, lake","Three — mountains, water, fields"],
+  { q:"Alex uses a Chinese saying to describe the village's location. According to him, what does it mean?",
+    o:["It has everything","It has five rivers","The mountain brings good luck","The sea gives fish and money"],
     a:0, tag:"location" },
   { q:"Alex points at one mountain and gives its name. Which mountain is it?",
     o:["Wuzhi Mountain","Jinniu Ling","Diaoluo Mountain","Bawang Ridge"],
     a:1, tag:"mountain" },
-  { q:"Which group of visitors does Alex mention, and where exactly do they walk?",
-    o:["Foreign guests — along the boardwalk","Chinese tourists — around the lake","Local farmers — through the fields","Business people — inside the forum hall"],
+  { q:"Who does Alex say come here during the conference, and what do they do?",
+    o:["Officials — they stroll along the boardwalk and discuss important topics","Foreign guests — they swim in the inner sea","Local farmers — they work in the fields","Kids — they play in the attractions"],
     a:0, tag:"visitors" },
-  { q:"Alex gives the exact year the modification project started. What is it?",
-    o:["2008","2015","2018","2021"],
-    a:2, tag:"year" },
+  { q:"Alex gives the exact year the project started. What is it? (Careful: he also mentions another year — the first time HE came here.)",
+    o:["2015","2017","2018","2021"],
+    a:1, tag:"year" },
   { q:"Alex names ONE local snack you must try, and ONE part of the village you should not miss. Which pair is right?",
     o:["Qingbuliang · Shamei Impression","Wenchang Chicken · Shamei Garden","Hainan noodles · Shamei Square","Coconut cake · Shamei Market"],
     a:0, tag:"food & sights" }
 ];
-const KW = ["Shamei Village","Boao Forum for Asia","unique location","mountains, water, forest, fields and lake","Jinniu Ling","boardwalk","village development","since 2018","Qingbuliang","Shamei Impression","homestays","beautiful architecture"];
+const KW = ["Shamei Village","unique location","Shan Shui Lin Tian Hu","it has everything","Jinniu Ling","inner sea","the annual forum","officials","boardwalk","village development","since 2017","Qingbuliang","Shamei Impression","beautiful architecture"];
 const CONNECTORS = ["because","so","and then","also","in my opinion","for example","first of all","finally","compared with the past","what's more"];
-const PORT_KW = ["shamei","village","boao","forum","location","mountain","water","forest","field","lake","jinniu","ling","boardwalk","homestay","restaurant","qingbuliang","development","2018","impression","architecture","guest","foreign","tourist","change","beautiful","coconut","sea","nature","model"];
+const PORT_KW = ["shamei","village","forum","location","mountain","water","forest","field","lake","sea","jinniu","ling","boardwalk","homestay","breakfast","restaurant","qingbuliang","development","2017","2018","impression","architecture","guest","official","foreign","tourist","change","beautiful","coconut","nature","model","everything","inner"];
 
 /* ================= state ================= */
 let state = {
@@ -704,11 +704,13 @@ function prepareQuiz(){
   /* 题目顺序 + 选项顺序都打乱 */
   const qIdx = shuffle(CQUIZ.map((_,k)=>k));
   QORDER = qIdx;
-  RUN = qIdx.map(qi=>{
+  /* RUN 按“原始题号”索引：RUN[qi] 存第 qi 题的排列与正确位，
+     这样 optOrder(origQ(i)) / correctPos(origQ(i)) 永远取到同一题的数据 */
+  RUN = [];
+  qIdx.forEach(qi=>{
     const q=CQUIZ[qi];
-    const idx = q.o.map((_,k)=>k);
-    let perm = shuffle(idx);
-    return { perm, correctPos: perm.indexOf(q.a) };
+    const perm = shuffle(q.o.map((_,k)=>k));
+    RUN[qi] = { perm, correctPos: perm.indexOf(q.a) };
   });
 }
 function optOrder(i){ return RUN[i] ? RUN[i].perm : CQUIZ[i].o.map((_,k)=>k); }
@@ -933,7 +935,7 @@ const PATTERNS = [
   "You can find",
   "There is also",
   "It is right next to",
-  "Since 2018,",
+  "Since 2017,",
   "Now it has",
   "My favorite part is",
   "You must try",
@@ -941,8 +943,8 @@ const PATTERNS = [
 ];
 const KW2 = [
   "Shamei Village","a beautiful village in Hainan","its unique location",
-  "mountains, water, forest, fields and lake","Jinniu Ling","the Boao Forum for Asia",
-  "foreign guests","a lovely boardwalk","beautiful architecture","homestays and restaurants",
+  "Shan Shui Lin Tian Hu","it has everything","Jinniu Ling","the inner sea",
+  "officials","a lovely boardwalk","beautiful architecture","bed-and-breakfast places",
   "Shamei Impression","Qingbuliang","a model of village development"
 ];
 
@@ -952,19 +954,19 @@ const PASSAGE = {
     "Good morning, everyone! Today I would like to introduce ",
     " — a beautiful village in Hainan that has become a new model of ",
     " development. The first thing I want to say is its unique ",
-    ": mountains, ",
-    ", forest, fields and ",
-    " all in one place. There is also a mountain called ",
-    " nearby. The village is right next to the ",
-    " Forum for Asia, so many ",
-    " guests come here every year and take a stroll along the boardwalk. Since ",
-    ", the village has changed a lot. Now it has beautiful architecture, ",
-    " and restaurants, and a lovely part called Shamei Impression. You must try the local snack ",
+    ": Shan Shui Lin Tian Hu, which means ",
+    "! There is also a mountain called ",
+    " nearby, and a special ",
+    " — it is not a lake, it is not a river. The village plays an important role in the annual ",
+    ", so many ",
+    " come here and take a stroll along the boardwalk. Since ",
+    ", the village has changed a lot. Now there is a lovely new part called Shamei Impression, with beautiful architecture, ",
+    " and restaurants. You must try the local snack ",
     "! In my opinion, Shamei Village is a perfect place to visit on your holiday."
   ],
   answers: [
-    "Shamei Village","village","location","water","lake",
-    "Jinniu Ling","Boao","foreign","2018","homestays","Qingbuliang"
+    "Shamei Village","village","location","it has everything","Jinniu Ling","inner sea",
+    "forum","officials","2017","bed-and-breakfast places","Qingbuliang"
   ],
   /* 无干扰词：给出的词刚好能填完 */
   distract: []
@@ -1219,7 +1221,7 @@ function renderResult(total,d){
   document.getElementById('sLang').textContent=d.lang;
   document.getElementById('sFlu').textContent=d.flu;
   const tips=[];
-  if(d.content<24) tips.push('💡 Mention more key words: the location (mountains, water, forest, fields and lake), Jinniu Ling, the Boao Forum, Shamei Impression.');
+  if(d.content<24) tips.push('💡 Mention more key words: the location ("Shan Shui Lin Tian Hu" — it has everything), Jinniu Ling, the inner sea, the annual forum, Shamei Impression.');
   if(d.lang<18) tips.push('💡 Use connectors like "because", "also", "what\'s more" to make your speech flow.');
   if(d.flu<18) tips.push('💡 Say a little more! A good introduction is about 45–100 words.');
   if(!tips.length) tips.push('🌟 Excellent job! Your introduction is clear, rich and well-connected!');
