@@ -95,7 +95,18 @@
   .btn.back:hover{ background:linear-gradient(180deg,#f8eed6,#e5d3ab); }
 
   /* ---------- progress ---------- */
-  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:6px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:6px; flex-wrap:wrap; }
+  /* 视频卡右上角按钮组：显示/隐藏视频 + 吸附 */
+  .tb-btns{ display:flex; gap:8px; align-items:center; justify-content:flex-end; flex:0 0 auto; margin-left:auto; }
+  .vidbtn{
+    background:#eef5df; border:2px solid var(--grass); color:var(--grass-d);
+    padding:7px 15px; border-radius:20px; font-size:13.5px; font-weight:800;
+    cursor:pointer; font-family:'Nunito',sans-serif; margin:0; transition:.15s; white-space:nowrap;
+    box-shadow:0 3px 0 rgba(127,166,83,.28);
+  }
+  .vidbtn:hover{ background:#e2efcb; }
+  .vidbtn:active{ transform:translateY(1px); box-shadow:none; }
+  #videoCard.vid-off{ background:#fdf9ee; border-style:dashed; }
   .progress{
     display:inline-block; color:var(--wood-d); font-size:12px; font-weight:800;
     letter-spacing:2px; text-transform:uppercase; background:rgba(253,246,227,.8);
@@ -489,13 +500,18 @@
 
     <div class="card" id="videoCard">
       <div class="topbar" style="margin-top:0">
-        <span class="qnum">🎬 Watch the video — always available</span>
-        <button class="btn gray small" id="stickyBtn" onclick="toggleSticky()">📌 Keep on top</button>
+        <span class="qnum" id="vidTitle">🎬 Watch the video</span>
+        <span class="tb-btns">
+          <button class="vidbtn" id="vidToggleBtn" type="button" onclick="toggleVideo()">🙈 隐藏视频</button>
+          <button class="btn gray small" id="stickyBtn" onclick="toggleSticky()" style="margin-top:0">📌 Keep on top</button>
+        </span>
       </div>
       <div id="vidBody">
-        <p style="margin:8px 0 10px; color:var(--ink-l); font-size:14px">The video stays here while you answer — rewind and watch again as often as you like.</p>
-        <video id="vid" src="shamei.mp4" controls playsinline></video>
-        <button class="btn gray small" onclick="toggleTranscript()">📄 Key lines</button>
+        <div id="vidWrap">
+          <p style="margin:8px 0 10px; color:var(--ink-l); font-size:14px">The video stays here while you answer — rewind and watch again as often as you like.</p>
+          <video id="vid" src="shamei.mp4" controls playsinline></video>
+        </div>
+        <button class="btn gray small" id="keyBtn" onclick="toggleTranscript()">📄 Key lines</button>
         <div class="transcript" id="transcript">
           <b>Alex:</b> Good morning, everybody! Alex here.<br>
           Shamei Village — a village that has become a new shiny <b>model of village development</b>.<br>
@@ -749,7 +765,7 @@ function redoQuiz(){
   window.state=state;
   prepareQuiz();          /* 重新洗题序 + 选项序 */
   renderMap();
-  go('sc-watch'); toggleVideo();
+  go('sc-watch'); resetVideo();
   showQ();                /* 回到新的第 1 题 */
 }
 
@@ -844,25 +860,47 @@ function stopRecIfOn(){ if(recOn) toggleRec(); }
 function backToWatch(){ stopRecIfOn(); go('sc-watch'); showQ(); }
 function backToSpeak(){ go('sc-speak'); }
 
-/* ================= transcript ================= */
+/* ================= transcript & video ================= */
+/* 视频收进右上角按钮：点「🙈 隐藏视频」收起，只留 Key lines；点「🎬 显示视频」再放出来 */
+let vidOpen=true, trWasOpen=false;
+function applyVideoState(){
+  const wrap=document.getElementById('vidWrap'), tr=document.getElementById('transcript'),
+        btn=document.getElementById('vidToggleBtn'), keyBtn=document.getElementById('keyBtn'),
+        stickyBtn=document.getElementById('stickyBtn'), title=document.getElementById('vidTitle'),
+        box=document.getElementById('videoCard');
+  if(!wrap) return;
+  wrap.style.display = vidOpen ? '' : 'none';
+  btn.textContent = vidOpen ? '🙈 隐藏视频' : '🎬 显示视频';
+  keyBtn.style.display = vidOpen ? '' : 'none';
+  stickyBtn.style.display = vidOpen ? '' : 'none';
+  box.classList.toggle('vid-off', !vidOpen);
+  title.textContent = vidOpen ? '🎬 Watch the video' : '📄 Key lines 关键台词';
+  if(vidOpen){
+    tr.style.display = trWasOpen ? 'block' : 'none';
+  }else{
+    tr.style.display = 'block';                 /* 收起视频后只留 key lines */
+    stickyOn('videoCard','stickyBtn',false);    /* 取消吸附，避免整卡浮在题目上 */
+    const v=document.getElementById('vid'); if(v) v.pause();
+  }
+}
+function toggleVideo(){
+  if(vidOpen) trWasOpen = document.getElementById('transcript').style.display==='block';
+  vidOpen = !vidOpen;
+  applyVideoState();
+}
+function resetVideo(){ vidOpen=true; trWasOpen=false; applyVideoState(); }
 function toggleTranscript(){
   const t=document.getElementById('transcript');
   t.style.display = t.style.display==='block' ? 'none' : 'block';
+  trWasOpen = t.style.display==='block';
 }
 
-/* 第一部分：视频常驻显示；📌 可吸附在屏幕顶部，滚动答题时也看得见 */
+/* 第一部分：视频可收进右上角按钮；📌 可吸附在屏幕顶部，滚动答题时也看得见 */
 function stickyOn(boxId, btnId, on){
   const box=document.getElementById(boxId);
   const btn=document.getElementById(btnId);
   box.classList.toggle('stickyvid', on);
   if(btn) btn.textContent = on ? '📌 Pinned on top ✓' : '📌 Keep on top';
-}
-function toggleVideo(){
-  /* 视频不再可隐藏：每次进入 Part A 都保证可见 */
-  const body=document.getElementById('vidBody');
-  if(body) body.style.display='block';
-  const box=document.getElementById('videoCard');
-  if(box) box.style.display='block';
 }
 function toggleSticky(){
   const box=document.getElementById('videoCard');
@@ -875,7 +913,7 @@ function toggleSticky(){
    state.qi 现在是"屏幕槽位"（第几题），原始题号 = QORDER[qi]。
    redo 之后 QORDER 变，同一槽位展示的是另一道题。 */
 function origQ(i){ return QORDER[i]; }
-function startQ(i){ stopRecIfOn(); state.qi=i; state.quizWrong=0; go('sc-watch'); toggleVideo(); showQ(); }
+function startQ(i){ stopRecIfOn(); state.qi=i; state.quizWrong=0; go('sc-watch'); showQ(); }
 
 function showQ(){
   const i=state.qi, oq=origQ(i), q=CQUIZ[oq];
