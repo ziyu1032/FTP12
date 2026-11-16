@@ -175,6 +175,23 @@
     background:linear-gradient(180deg,#f9f2df,#f2e8cf); border:2px dashed var(--hay-d);
     border-radius:14px;
   }
+  /* ---- 吸底词库（fixed dock）：随题目滚动一直在屏幕底部，可 Hide/Show ---- */
+  .bankdock{position:fixed; left:0; right:0; bottom:0; z-index:90; background:#fff;
+    border-top:3px solid var(--hay-d); box-shadow:0 -6px 22px rgba(107,69,42,.16);
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    max-width:1280px; margin:0 auto; border-radius:18px 18px 0 0;}
+  .dock-head{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;}
+  .dock-title{font-size:13px; font-weight:800; color:var(--ink-l);}
+  .dock-btn{background:#f6efdb; border:2px solid var(--hay-d); color:var(--wood-d);
+    font-weight:800; font-size:12.5px; padding:6px 14px; border-radius:99px; cursor:pointer;
+    box-shadow:0 3px 0 rgba(201,169,98,.35); transition:.15s; flex:0 0 auto; font-family:inherit;}
+  .dock-btn:active{transform:translateY(1px);}
+  .bankdock .wordbank{margin:2px 0 0; background:none; border:none; padding:4px 0 0;}
+  body.dock-open #spGap{padding-bottom:var(--dockH,150px);}
+  @media (min-width:641px){
+    .dock-title{font-size:17px;}
+    .dock-btn{font-size:15.5px;}
+  }
   .word{
     background:#fff; border:2px solid var(--hay); border-bottom-width:3px;
     border-radius:20px; padding:8px 18px; font-size:15px; font-weight:800;
@@ -589,7 +606,6 @@
       <div class="passage" id="passage"></div>
       <div class="feedback" id="gapFb"></div>
       <div class="cn" id="gapLeft" style="margin-top:6px;font-weight:700"></div>
-      <div class="wordbank" id="gapBank"></div>
       <div class="row">
         <button class="btn back small" onclick="resetGaps()">↺ Reset</button>
         <button class="btn small" id="gapReadBtn" onclick="readPassage()">🔊 Read the passage</button>
@@ -609,6 +625,15 @@
 
       <div class="row">
         <button class="btn" id="finishBtn2" style="display:none" onclick="showFinish()">See My Results 🏁</button>
+      </div>
+
+      <!-- 吸底词库：跟题滚动，可 Hide / Show -->
+      <div class="bankdock" id="bankDock">
+        <div class="dock-head">
+          <span class="dock-title" id="dockTitle">🔑 Word Bank 单词库 · 还有 11 个空 — 点下面的词填空</span>
+          <button class="dock-btn" id="bankToggle" type="button">Hide 隐藏 ▾</button>
+        </div>
+        <div class="wordbank" id="gapBank"></div>
       </div>
     </div>
 
@@ -1057,6 +1082,7 @@ function buildGap(){
   gapCur=0;
   gapWords=PASSAGE.answers.slice().sort(()=>Math.random()-0.5);
   renderPassage(); renderGapBank();
+  setBank(true);   /* 进入/重做时确保底部词库展开 */
   const fb=document.getElementById("gapFb"); fb.textContent=""; fb.className="feedback";
 }
 function gapLabel(i){
@@ -1089,6 +1115,9 @@ function renderGapBank(){
   if(hint) hint.textContent = (left<=0 && blanksLeft===0)
     ? "✅ All words used"
     : ("Words left: "+Math.max(0,left)+"  ·  Blanks left: "+blanksLeft);
+  if(dockTitle) dockTitle.textContent = (left<=0 && blanksLeft===0)
+    ? '🔑 Word Bank 单词库 · 11 个空全填对了！'
+    : '🔑 Word Bank 单词库 · 还有 '+blanksLeft+' 个空 — 点下面的词填空';
 }
 function syncGapState(){
   renderPassage();
@@ -1133,6 +1162,25 @@ function currentPassageText(){
   return t.replace(/\s+/g,' ').trim();
 }
 function readPassage(){ speak(currentPassageText()); }
+
+/* ---- 吸底词库：固定屏幕底部跟题滚动，Hide 收起 / Show 展开 ---- */
+const dockEl=document.getElementById('bankDock'),
+      bankToggleBtn=document.getElementById('bankToggle'),
+      dockTitle=document.getElementById('dockTitle'),
+      gapBankEl=document.getElementById('gapBank');
+function syncDock(){
+  if(!dockEl) return;
+  const h=dockEl.offsetHeight + 20;
+  document.documentElement.style.setProperty('--dockH', h+'px');
+}
+function setBank(open){
+  if(!dockEl || !gapBankEl) return;
+  gapBankEl.style.display = open ? '' : 'none';
+  bankToggleBtn.textContent = open ? 'Hide 隐藏 ▾' : 'Show 展开 ▴';
+  document.body.classList.toggle('dock-open', open);
+  requestAnimationFrame(syncDock);
+}
+bankToggleBtn.onclick = () => setBank(gapBankEl.style.display === 'none');
 
 /* ---------- 录音 / 打字（两条路径共用） ---------- */
 function toggleRec(ctx){
