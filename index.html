@@ -107,6 +107,24 @@
   .vidbtn:hover{ background:#e2efcb; }
   .vidbtn:active{ transform:translateY(1px); box-shadow:none; }
   #videoCard.vid-off{ background:#fdf9ee; border-style:dashed; }
+  /* ---------- Part B 右上角悬浮视频按钮 + 视频面板 ---------- */
+  .floatvid-btn{
+    position:fixed; top:10px; right:10px; z-index:95;
+    background:linear-gradient(180deg,var(--leaf),var(--grass)); color:#fff;
+    border:none; border-bottom:4px solid var(--grass-d); border-radius:22px;
+    padding:9px 18px; font-size:14px; font-weight:800; cursor:pointer;
+    font-family:'Nunito',sans-serif; letter-spacing:.3px;
+    box-shadow:0 6px 18px rgba(107,69,42,.3);
+  }
+  .floatvid-btn:active{ transform:translateY(1px); border-bottom-width:2px; }
+  .floatvid-panel{
+    position:fixed; top:56px; right:10px; z-index:94;
+    background:var(--cream); border:3px solid var(--hay-d); border-radius:16px;
+    padding:10px 12px 12px; width:min(430px, calc(100vw - 20px));
+    box-shadow:0 12px 30px rgba(107,69,42,.3);
+  }
+  .fv-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+  .floatvid-panel video{ max-height:250px; }
   .progress{
     display:inline-block; color:var(--wood-d); font-size:12px; font-weight:800;
     letter-spacing:2px; text-transform:uppercase; background:rgba(253,246,227,.8);
@@ -550,6 +568,16 @@
     </div>
     <div class="steps" id="stC"><i></i><i></i><i></i></div>
 
+    <!-- Part B 右上角悬浮视频：点「🎬 Video」弹出看视频，再点收起 -->
+    <button class="floatvid-btn" id="partBvidBtn" type="button" onclick="toggleFloatVid()">🎬 Video</button>
+    <div class="floatvid-panel" id="floatVidPanel" style="display:none">
+      <div class="fv-head">
+        <span class="qnum">🎬 Video</span>
+        <button class="vidbtn" type="button" onclick="toggleFloatVid()">✕ 收起</button>
+      </div>
+      <div id="fvSlot"></div>
+    </div>
+
     <!-- 路径选择 -->
     <div class="card" id="spChoose">
       <div class="qnum">🎤 Introduce Shamei Village — choose your way</div>
@@ -774,7 +802,33 @@ function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const v=document.getElementById('vid'); if(v) v.pause();
+  /* 离开 Part B 时：收起悬浮视频面板，把视频放回 Part A 卡片里 */
+  const fvPanel=document.getElementById('floatVidPanel'),
+        fvSlot=document.getElementById('fvSlot'),
+        vidWrap=document.getElementById('vidWrap');
+  if(fvPanel && fvPanel.style.display==='block'){
+    fvPanel.style.display='none'; fvOpen=false;
+    const b=document.getElementById('partBvidBtn'); if(b) b.textContent='🎬 Video';
+  }
+  if(id!=='sc-speak' && v && vidWrap && v.parentElement!==vidWrap) vidWrap.appendChild(v);
   window.scrollTo(0,0);
+}
+/* ---- Part B 右上角悬浮视频：点「🎬 Video」弹出，再点收起 ---- */
+let fvOpen=false;
+function toggleFloatVid(){
+  const panel=document.getElementById('floatVidPanel'), slot=document.getElementById('fvSlot'),
+        vid=document.getElementById('vid'), btn=document.getElementById('partBvidBtn');
+  if(!panel) return;
+  fvOpen=!fvOpen;
+  if(fvOpen){
+    if(vid && slot && vid.parentElement!==slot) slot.appendChild(vid);
+    panel.style.display='block';
+    btn.textContent='✕ 关闭视频';
+  }else{
+    panel.style.display='none';
+    btn.textContent='🎬 Video';
+    if(vid) vid.pause();
+  }
 }
 function startGame(){ prepareQuiz(); go('sc-map'); renderMap(); }
 
