@@ -495,8 +495,8 @@
 
       <p style="font-size:17px; line-height:1.9">Hi! I'm <b>Alex</b> 👋 and today I'm taking you on a motorbike tour of <b>Shamei Village</b> in Hainan — a village that has become a <b>new model of village development</b>.</p>
       <p style="font-size:17px; line-height:1.9; margin-top:12px">Watch my video, answer the questions, and finally <b>introduce Shamei Village in your own words</b>!</p>
-      <p class="hintline">Watch the video → answer 5 questions → fill in 5 sentences → give your own introduction</p>
-      <p class="hintline">Do the three parts in any order — the Task Map is always one click away.</p>
+      <p class="hintline">Watch the video → answer 6 questions → introduce Shamei Village in your own words</p>
+      <p class="hintline">Do the tasks in any order — the Task Map is always one click away.</p>
       <button class="btn" onclick="startGame()">Let's Go! 🛵</button>
       <div class="deco">🌱 🌻 🐓 🌾</div>
     </div>
@@ -523,7 +523,7 @@
       <div class="grouphd"><span>🎤 Part B · Speak</span><span class="cnt" id="cntS">—</span></div>
       <div class="mapgrid" id="mapS"></div>
 
-      <div class="totalline">Total score：<b id="mapTotal">0</b> / 160</div>
+      <div class="totalline">Total score: <b id="mapTotal">0</b> / 160</div>
       <div class="row" style="justify-content:center">
         <button class="btn gray" onclick="showFinish()">See My Results 🏁</button>
       </div>
@@ -636,7 +636,7 @@
       <p class="grouplbl">② Key words (click to insert)</p>
       <div id="kwBox" class="chipbox"></div>
 
-      <div id="kwLog" class="kwlog">Your keywords：<span id="kwLogTx" style="color:var(--ink-l)">—</span></div>
+      <div id="kwLog" class="kwlog">Your keywords: <span id="kwLogTx" style="color:var(--ink-l)">—</span></div>
 
       <p class="grouplbl">③ Your note / draft</p>
       <textarea class="field" id="noteBox" rows="6" placeholder="Click the sentence patterns and key words above — they will appear here. You can also add your own ideas."></textarea>
@@ -668,7 +668,7 @@
         <span class="qnum">📜 Way 2 · Complete the Passage</span>
         <button class="btn back" onclick="backToChoose()">← Choose again</button>
       </div>
-      <p style="margin:10px 0 4px; font-size:14px; color:var(--ink-l)">Read the model passage and fill in each blank from the word bank — the words are <b>exactly enough</b>, so every word gets used once.</p>
+      <p style="margin:10px 0 4px; font-size:14px; color:var(--ink-l)">Read the model passage and fill in each blank from the word bank — there are <b>exactly as many words as blanks</b>, so every word gets used once.</p>
 
       <div class="passage" id="passage"></div>
       <div class="feedback" id="gapFb"></div>
@@ -736,7 +736,7 @@
       <div class="big" id="finScore">0</div>
       <div class="lbl">Total Score / 160</div>
       <div class="row" style="margin-top:16px">
-        <div class="stat"><b id="finQuiz">0</b><span>Quiz (50)</span></div>
+        <div class="stat"><b id="finQuiz">0</b><span>Quiz (60)</span></div>
         <div class="stat"><b id="finSpeak">0</b><span>Speaking (100)</span></div>
       </div>
       <div id="finMsg" style="font-size:17px; margin-top:18px; line-height:1.8; font-weight:700; color:var(--wood-d)"></div>
@@ -762,7 +762,7 @@ const CQUIZ = [
     o:["Wuzhi Mountain","Jinniu Ling","Diaoluo Mountain","Bawang Ridge"],
     a:1, tag:"mountain" },
   { q:"Who does Alex say come here during the conference, and what do they do?",
-    o:["Officials — they stroll along the boardwalk and discuss important topics","Foreign guests — they swim in the inner sea","Local farmers — they work in the fields","Kids — they play in the attractions"],
+    o:["Officials — they stroll along the boardwalk and discuss important topics","Foreign guests — they swim in the inner sea","Local farmers — they work in the fields","Kids — they play at the attractions"],
     a:0, tag:"visitors" },
   { q:"Alex gives the exact year the project started. What is it? (Careful: he also mentions another year — the first time HE came here.)",
     o:["2015","2017","2018","2021"],
