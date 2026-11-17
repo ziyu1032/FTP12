@@ -520,7 +520,7 @@
       <div class="topbar" style="margin-top:0">
         <span class="qnum" id="vidTitle">🎬 Watch the video</span>
         <span class="tb-btns">
-          <button class="vidbtn" id="vidToggleBtn" type="button" onclick="toggleVideo()">🙈 隐藏视频</button>
+          <button class="vidbtn" id="vidToggleBtn" type="button" onclick="toggleVideo()">🎬 看视频</button>
           <button class="btn gray small" id="stickyBtn" onclick="toggleSticky()" style="margin-top:0">📌 Keep on top</button>
         </span>
       </div>
@@ -838,19 +838,18 @@ function toMap(){ stopRecIfOn(); go('sc-map'); renderMap(); }
 function renderMap(){
   /* Part A */
   const mq=document.getElementById('mapQ'); mq.innerHTML='';
-  /* 按 QORDER 显示：redo 后题目顺序会变 */
-  QORDER.forEach((origQ,slot)=>{
-    const q=CQUIZ[origQ];
-    const b=document.createElement('button');
-    b.className='mapitem'+(state.quizDone[origQ]?' done':'');
-    b.innerHTML='<span class="ico">'+(state.quizDone[origQ]?'✅':'✏️')+'</span>'+
-      '<span class="tx"><span class="ti">Q'+(slot+1)+'. '+short(q.q,58)+' <em class="qtag">'+(q.tag||'')+'</em></span>'+
-      '<span class="ts">'+(state.quizDone[origQ]?'Done · answered':'10 pts · multiple choice')+'</span></span>'+
-      '<span class="mark">➜</span>';
-    b.onclick=()=>startQ(slot);
-    mq.appendChild(b);
-  });
-  document.getElementById('cntQ').textContent=countDone(state.quizDone)+' / 6';
+  /* Part A 只留一个入口，不一一展示题目；点进去看题（题内用圆点切换） */
+  const doneA=countDone(state.quizDone);
+  const b=document.createElement('button');
+  b.className='mapitem'+(doneA===6?' done':'');
+  b.innerHTML='<span class="ico">'+(doneA===6?'✅':'🎬')+'</span>'+
+    '<span class="tx"><span class="ti">Watch the video &amp; answer 6 questions</span>'+
+    '<span class="ts">'+(doneA===6 ? 'All done · '+state.quizScore+' pts earned'
+                                   : 'Click to enter · '+doneA+' / 6 answered')+'</span></span>'+
+    '<span class="mark">➜</span>';
+  b.onclick=()=>startQ(0);
+  mq.appendChild(b);
+  document.getElementById('cntQ').textContent=doneA+' / 6';
 
   /* Part B：两条路径，完成任一条即可 */
   const ms=document.getElementById('mapS'); ms.innerHTML='';
@@ -916,7 +915,9 @@ function backToSpeak(){ go('sc-speak'); }
 
 /* ================= transcript & video ================= */
 /* 视频收进右上角按钮：点「🙈 隐藏视频」收起，只留 Key lines；点「🎬 显示视频」再放出来 */
-let vidOpen=true, trWasOpen=false;
+/* 视频默认隐藏：点「🎬 看视频」才出现，再点「🙈 隐藏视频」收回；
+   Key lines 默认不显示：点「📄 Key lines」出来，再点收回。两者互相独立。 */
+let vidOpen=false;
 function applyVideoState(){
   const wrap=document.getElementById('vidWrap'), tr=document.getElementById('transcript'),
         btn=document.getElementById('vidToggleBtn'), keyBtn=document.getElementById('keyBtn'),
@@ -924,30 +925,23 @@ function applyVideoState(){
         box=document.getElementById('videoCard');
   if(!wrap) return;
   wrap.style.display = vidOpen ? '' : 'none';
-  btn.textContent = vidOpen ? '🙈 隐藏视频' : '🎬 显示视频';
-  keyBtn.style.display = vidOpen ? '' : 'none';
+  btn.textContent = vidOpen ? '🙈 隐藏视频' : '🎬 看视频';
   stickyBtn.style.display = vidOpen ? '' : 'none';
+  keyBtn.style.display = '';                  /* Key lines 按钮始终可点 */
   box.classList.toggle('vid-off', !vidOpen);
-  title.textContent = vidOpen ? '🎬 Watch the video' : '📄 Key lines 关键台词';
-  if(vidOpen){
-    tr.style.display = trWasOpen ? 'block' : 'none';
-  }else{
-    tr.style.display = 'block';                 /* 收起视频后只留 key lines */
+  title.textContent = vidOpen ? '🎬 Watch the video' : '🎬 Watch the video（点按钮看）';
+  if(!vidOpen){
     stickyOn('videoCard','stickyBtn',false);    /* 取消吸附，避免整卡浮在题目上 */
     const v=document.getElementById('vid'); if(v) v.pause();
   }
 }
-function toggleVideo(){
-  if(vidOpen) trWasOpen = document.getElementById('transcript').style.display==='block';
-  vidOpen = !vidOpen;
-  applyVideoState();
-}
-function resetVideo(){ vidOpen=true; trWasOpen=false; applyVideoState(); }
+function toggleVideo(){ vidOpen=!vidOpen; applyVideoState(); }
+function resetVideo(){ vidOpen=false; applyVideoState(); }
 function toggleTranscript(){
   const t=document.getElementById('transcript');
   t.style.display = t.style.display==='block' ? 'none' : 'block';
-  trWasOpen = t.style.display==='block';
 }
+applyVideoState();   /* 页面加载即应用默认状态：视频隐藏、Key lines 收起 */
 
 /* 第一部分：视频可收进右上角按钮；📌 可吸附在屏幕顶部，滚动答题时也看得见 */
 function stickyOn(boxId, btnId, on){
